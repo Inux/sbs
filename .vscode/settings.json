@@ -1,0 +1,11 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**.o": true,
+        "*.h": true,
+        "*.cpp": true,
+        "*.stash": true,
+        "Makefile": true,
+        "**.pro.user": true
+    }
+}
