@@ -6,6 +6,11 @@
 #ifndef QT_NO_SYSTEMTRAYICON
 
 #include <QDialog>
+#include <QDebug>
+#include <qlogging.h>
+
+#include "cmd.h"
+#include "cmds.h"
 
 class QAction;
 class QCheckBox;
@@ -34,9 +39,11 @@ private slots:
     void setIcon(int index);
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void showMessage();
+    void executeCommand();
     void messageClicked();
 
 private:
+    void createCommands();
     void createIconGroupBox();
     void createMessageGroupBox();
     void createActions();
@@ -46,6 +53,7 @@ private:
     QLabel *iconLabel;
     QComboBox *iconComboBox;
     QCheckBox *showIconCheckBox;
+    QPushButton *executeCommandButton;
 
     QGroupBox *messageGroupBox;
     QLabel *typeLabel;
@@ -66,6 +74,8 @@ private:
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
+
+    Commands::Cmds* commands;
 };
 
 #endif // QT_NO_SYSTEMTRAYICON

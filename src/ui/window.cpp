@@ -16,9 +16,11 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <qfileinfo.h>
 
 Window::Window()
 {
+    createCommands();
     createIconGroupBox();
     createMessageGroupBox();
 
@@ -27,6 +29,7 @@ Window::Window()
     createActions();
     createTrayIcon();
 
+    connect(executeCommandButton, &QAbstractButton::clicked, this, &Window::executeCommand);
     connect(showMessageButton, &QAbstractButton::clicked, this, &Window::showMessage);
     connect(showIconCheckBox, &QAbstractButton::toggled, trayIcon, &QSystemTrayIcon::setVisible);
     connect(iconComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -118,25 +121,46 @@ void Window::messageClicked()
                                 "Maybe you should try asking a human?"));
 }
 
+void Window::executeCommand()
+{
+    QString key = iconComboBox->itemText(iconComboBox->currentIndex());
+    qDebug() << key;
+    auto pos = commands->getCmds().find(key);
+    if(pos != commands->getCmds().end()) {
+        Commands::Cmd cmd = pos->second;
+        qDebug() << "Executing: " << cmd.getName();
+        cmd.execute();
+    }
+}
+
 void Window::createIconGroupBox()
 {
-    iconGroupBox = new QGroupBox(tr("Tray Icon"));
+    iconGroupBox = new QGroupBox(tr("Commands"));
 
-    iconLabel = new QLabel("Icon:");
+    iconLabel = new QLabel("Command:");
 
     iconComboBox = new QComboBox;
-    iconComboBox->addItem(QIcon(":/images/bad.png"), tr("Bad"));
-    iconComboBox->addItem(QIcon(":/images/heart.png"), tr("Heart"));
-    iconComboBox->addItem(QIcon(":/images/trash.png"), tr("Trash"));
+    qDebug() << "Add Command to UI:";
+    qDebug() << "commands size: " << commands->getCmds().size();
+    for(auto& c : commands->getCmds()) {
+        qDebug() << c.first;
+        qDebug() << "Script: " << c.second.getName();
+        iconComboBox->addItem(QIcon(":/images/heart.png"),
+                              c.second.getName());
+    }
 
     showIconCheckBox = new QCheckBox(tr("Show icon"));
     showIconCheckBox->setChecked(true);
+
+    executeCommandButton = new QPushButton(tr("Execute Command"));
+    executeCommandButton->setDefault(true);
 
     QHBoxLayout *iconLayout = new QHBoxLayout;
     iconLayout->addWidget(iconLabel);
     iconLayout->addWidget(iconComboBox);
     iconLayout->addStretch();
     iconLayout->addWidget(showIconCheckBox);
+    iconLayout->addWidget(executeCommandButton);
     iconGroupBox->setLayout(iconLayout);
 }
 
@@ -227,6 +251,28 @@ void Window::createTrayIcon()
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
+}
+
+void Window::createCommands()
+{
+    commands = new Commands::Cmds();
+
+    Commands::Cmd cmdOne(Commands::PYTHON,
+            "Python Hello World",
+            ":/scripts/test/hello_world.py");
+
+    Commands::Cmd cmdTwo(Commands::BASH,
+            "Bash Hello World",
+            ":/scripts/test/hello_world.sh");
+
+    commands->add(cmdOne);
+    commands->add(cmdTwo);
+
+    qDebug() << "Added following commands:";
+    for(auto& c : commands->getCmds()) {
+        qDebug() << c.first;
+        qDebug() << "Script: " << c.second.getScriptPath();
+    }
 }
 
 #endif

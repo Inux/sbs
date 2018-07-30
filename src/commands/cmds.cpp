@@ -1,15 +1,21 @@
 #include "cmds.h"
 
-using namespace Commands;
+namespace Commands {
 
-Cmds::Cmds() {
+Cmds::Cmds() : mCmds() {
+}
+
+std::map<QString, Cmd>& Cmds::getCmds() {
+    return mCmds;
 }
 
 void Cmds::add(Cmd cmd) {
-    this->mCmds.push_back(cmd);
+    mCmds.insert(std::pair<QString, Cmd>(cmd.getName(), cmd));
 }
 
 void Cmds::remove(Cmd cmd) {
-    this->mCmds.remove(cmd);
+    mCmds.erase(mCmds.find(cmd.getName()));
+}
+
 }
 

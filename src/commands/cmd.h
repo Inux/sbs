@@ -1,27 +1,32 @@
 #ifndef CMD_H
 #define CMD_H
 
-#include <string>
-
 #include "cmdtype.h"
+
+#include <qstring.h>
+#include <qdebug.h>
+#include <qfileinfo.h>
+#include <qdir.h>
+#include <qprocess.h>
+#include <qtemporaryfile.h>
 
 namespace Commands {
 
 class Cmd
 {
 public:
-    Cmd(std::string name, std::string scriptPath, CmdType cmdType);
+    Cmd(CmdType cmdType, QString name, QString scriptPath);
     ~Cmd() = default;
-    bool execute(void);
-    std::string getName(void) const;
-    std::string getScriptPath(void) const;
+    bool execute(void) const;
     CmdType getCmdType(void) const;
+    QString getName(void) const;
+    QString getScriptPath(void) const;
 
     bool operator==(const Cmd& otherCmd) const;
 private:
-    std::string mName;
-    std::string mScriptPath;
     CmdType mCmdType;
+    QString mName;
+    QString mScriptPath;
 };
 
 }

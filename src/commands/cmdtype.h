@@ -7,7 +7,6 @@ namespace Commands {
 enum CmdType : unsigned int
 {
     BASH,
-    BAT,
     PYTHON
 };
 

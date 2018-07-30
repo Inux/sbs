@@ -2,6 +2,9 @@ QT      += widgets
 
 TARGET = sbs
 
+INCLUDEPATH += $$PWD/src/commands \
+    $$PWD/src/ui
+
 SOURCES += src/main.cpp \
     src/ui/window.cpp \
     src/commands/cmds.cpp \
