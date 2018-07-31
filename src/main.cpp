@@ -2,13 +2,37 @@
 
 #ifndef QT_NO_SYSTEMTRAYICON
 
+#include <QDebug>
 #include <QMessageBox>
+#include <QVariant>
+#include <qmetatype.h>
 #include "ui/window.h"
+
+QDataStream& operator<<(QDataStream& out, const Commands::Cmd& v) {
+    out << v.cmdType << v.name << v.scriptPath;
+    qDebug() << v.cmdType << v.name << v.scriptPath;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, Commands::Cmd& v) {
+    int i;
+    in >> i;
+    v.cmdType = static_cast<Commands::CmdType>(i);
+    in >> v.name;
+    in >> v.scriptPath;
+    qDebug() << v.cmdType << v.name << v.scriptPath;
+    return in;
+}
 
 int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE(systray);
+    qRegisterMetaTypeStreamOperators<QList<QString>>("QList<QString>");
+    qRegisterMetaTypeStreamOperators<Commands::Cmd>("Commands::Cmd");
 
+    QCoreApplication::setOrganizationName("inux");
+    QCoreApplication::setOrganizationDomain("steveineichen.ch");
+    QCoreApplication::setApplicationName("sbs");
     QApplication app(argc, argv);
 
     if (!QSystemTrayIcon::isSystemTrayAvailable()) {

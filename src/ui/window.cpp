@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QCloseEvent>
+#include <QDate>
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
@@ -65,7 +66,7 @@ void Window::closeEvent(QCloseEvent *event)
     }
 #endif
     if (trayIcon->isVisible()) {
-        QMessageBox::information(this, tr("Systray"),
+        QMessageBox::information(this, tr("Systray Scripts"),
                                  tr("The program will keep running in the "
                                     "system tray. To terminate the program, "
                                     "choose <b>Quit</b> in the context menu "
@@ -123,13 +124,30 @@ void Window::messageClicked()
 
 void Window::executeCommand()
 {
+    showIconCheckBox->setChecked(true);
     QString key = iconComboBox->itemText(iconComboBox->currentIndex());
     qDebug() << key;
-    auto pos = commands->getCmds().find(key);
-    if(pos != commands->getCmds().end()) {
+    auto pos = cmdManager->getCmds().find(key);
+    if(pos != cmdManager->getCmds().end()) {
         Commands::Cmd cmd = pos->second;
-        qDebug() << "Executing: " << cmd.getName();
-        cmd.execute();
+        qDebug() << "Executing: " << cmd.name;
+        Commands::CmdResult res = cmdManager->execute(cmd.name);
+
+        if(res.result) {
+            trayIcon->setIcon(QIcon(":/images/heart.png"));
+            trayIcon->showMessage(cmd.name,
+                                  cmd.scriptPath + " executed Successfully!",
+                                  QSystemTrayIcon::Critical,
+                                  durationSpinBox->value() * 1000);
+        } else {
+            QSystemTrayIcon::MessageIcon msgIcon = QSystemTrayIcon::Warning;
+            trayIcon->setIcon(QIcon(":/images/heart.png"));
+            trayIcon->showMessage(cmd.name,
+                                  cmd.scriptPath + " execution Problem!\n" +
+                                  "Output: \n" + res.errors,
+                                  msgIcon,
+                                  durationSpinBox->value() * 1000);
+        }
     }
 }
 
@@ -141,12 +159,12 @@ void Window::createIconGroupBox()
 
     iconComboBox = new QComboBox;
     qDebug() << "Add Command to UI:";
-    qDebug() << "commands size: " << commands->getCmds().size();
-    for(auto& c : commands->getCmds()) {
+    qDebug() << "commands size: " << cmdManager->getCmds().size();
+    for(auto& c : cmdManager->getCmds()) {
         qDebug() << c.first;
-        qDebug() << "Script: " << c.second.getName();
+        qDebug() << "Script: " << c.second.name;
         iconComboBox->addItem(QIcon(":/images/heart.png"),
-                              c.second.getName());
+                              c.second.name);
     }
 
     showIconCheckBox = new QCheckBox(tr("Show icon"));
@@ -255,24 +273,28 @@ void Window::createTrayIcon()
 
 void Window::createCommands()
 {
-    commands = new Commands::Cmds();
+    cmdManager = new Commands::CmdManager();
+    cmdManager->loadSettings();
 
-    Commands::Cmd cmdOne(Commands::PYTHON,
+    /*Commands::Cmd cmdOne = {Commands::PYTHON,
             "Python Hello World",
-            ":/scripts/test/hello_world.py");
+            ":/scripts/test/hello_world.py"};
 
-    Commands::Cmd cmdTwo(Commands::BASH,
+    Commands::Cmd cmdTwo = {Commands::BASH,
             "Bash Hello World",
-            ":/scripts/test/hello_world.sh");
+            ":/scripts/test/hello_world.sh"};
 
-    commands->add(cmdOne);
-    commands->add(cmdTwo);
+    cmdManager->add(cmdOne);
+    cmdManager->add(cmdTwo);
+    */
 
     qDebug() << "Added following commands:";
-    for(auto& c : commands->getCmds()) {
+    for(auto& c : cmdManager->getCmds()) {
         qDebug() << c.first;
-        qDebug() << "Script: " << c.second.getScriptPath();
+        qDebug() << "Script: " << c.second.scriptPath;
     }
+
+    cmdManager->saveSettings();
 }
 
 #endif

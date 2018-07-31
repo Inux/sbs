@@ -5,5 +5,6 @@
         <file>images/trash.png</file>
         <file>scripts/test/hello_world.py</file>
         <file>scripts/test/hello_world.sh</file>
+        <file>config/config.ini</file>
     </qresource>
 </RCC>

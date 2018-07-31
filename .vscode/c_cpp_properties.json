@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/src/**",
+                "/usr/local/Cellar/qt/5.9.3/lib/QtCore.framework/Versions/5/Headers",
+                "/usr/local/Cellar/qt/5.9.3/lib/QtWidgets.framework/Versions/5/Headers",
+                "/usr/local/Cellar/qt/5.9.3/lib/QtGui.framework/Versions/5/Headers"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}

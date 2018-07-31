@@ -3,32 +3,21 @@
 
 #include "cmdtype.h"
 
+#include <qvariant.h>
 #include <qstring.h>
-#include <qdebug.h>
-#include <qfileinfo.h>
-#include <qdir.h>
-#include <qprocess.h>
-#include <qtemporaryfile.h>
+#include <qdatastream.h>
+#include <QtCore/qsettings.h>
 
 namespace Commands {
 
-class Cmd
-{
-public:
-    Cmd(CmdType cmdType, QString name, QString scriptPath);
-    ~Cmd() = default;
-    bool execute(void) const;
-    CmdType getCmdType(void) const;
-    QString getName(void) const;
-    QString getScriptPath(void) const;
-
-    bool operator==(const Cmd& otherCmd) const;
-private:
-    CmdType mCmdType;
-    QString mName;
-    QString mScriptPath;
+struct Cmd {
+    Commands::CmdType cmdType;
+    QString name;
+    QString scriptPath;
 };
 
-}
+} // nammespace Commands
+
+Q_DECLARE_METATYPE(Commands::Cmd)
 
 #endif // CMD_H

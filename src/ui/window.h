@@ -9,8 +9,8 @@
 #include <QDebug>
 #include <qlogging.h>
 
-#include "cmd.h"
-#include "cmds.h"
+#include "cmdresult.h"
+#include "cmdmanager.h"
 
 class QAction;
 class QCheckBox;
@@ -75,7 +75,7 @@ private:
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
 
-    Commands::Cmds* commands;
+    Commands::CmdManager* cmdManager;
 };
 
 #endif // QT_NO_SYSTEMTRAYICON

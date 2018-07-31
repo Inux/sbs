@@ -3,13 +3,12 @@
 
 namespace Commands {
 
-
-enum CmdType : unsigned int
+typedef enum : unsigned int
 {
     BASH,
     PYTHON
-};
+} CmdType;
 
-}
+}; // namespace Commands
 
 #endif // CMDTYPE_H
