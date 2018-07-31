@@ -46,6 +46,7 @@ private:
     void createCommands();
     void createIconGroupBox();
     void createMessageGroupBox();
+    void createCmdGroupBox();
     void createActions();
     void createTrayIcon();
 
@@ -66,6 +67,15 @@ private:
     QLineEdit *titleEdit;
     QTextEdit *bodyEdit;
     QPushButton *showMessageButton;
+
+    QGroupBox* cmdGroupBox;
+    QLabel* cmdTypeLabel;
+    QComboBox *cmdTypeComboBox;
+    QLabel* cmdNameLabel;
+    QLineEdit* cmdNameEdit;
+    QLabel* cmdScriptLabel;
+    QLineEdit* cmdScriptEdit;
+    QPushButton* cmdSaveButton;
 
     QAction *minimizeAction;
     QAction *maximizeAction;

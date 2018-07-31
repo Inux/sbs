@@ -24,6 +24,7 @@ Window::Window()
     createCommands();
     createIconGroupBox();
     createMessageGroupBox();
+    createCmdGroupBox();
 
     iconLabel->setMinimumWidth(durationLabel->sizeHint().width());
 
@@ -41,6 +42,7 @@ Window::Window()
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(iconGroupBox);
     mainLayout->addWidget(messageGroupBox);
+    mainLayout->addWidget(cmdGroupBox);
     setLayout(mainLayout);
 
     iconComboBox->setCurrentIndex(1);
@@ -241,6 +243,36 @@ void Window::createMessageGroupBox()
     messageLayout->setColumnStretch(3, 1);
     messageLayout->setRowStretch(4, 1);
     messageGroupBox->setLayout(messageLayout);
+}
+
+void Window::createCmdGroupBox() {
+    cmdGroupBox = new QGroupBox(tr("Commands"));
+
+    cmdTypeLabel = new QLabel(tr("Type:"));
+    cmdTypeComboBox = new QComboBox;
+    cmdTypeComboBox->addItem("Python");
+    cmdTypeComboBox->addItem("Bash");
+    cmdTypeComboBox->setCurrentIndex(1);
+
+    cmdNameLabel = new QLabel(tr("Name:"));
+    cmdNameEdit = new QLineEdit(tr("Command"));
+
+    cmdScriptLabel = new QLabel(tr("Script Path:"));
+    cmdScriptEdit = new QLineEdit(tr("/path/to/script.sh"));
+
+    cmdSaveButton = new QPushButton(tr("Save"));
+    showMessageButton->setDefault(true);
+
+    QGridLayout *cmdLayout = new QGridLayout;
+    cmdLayout->addWidget(cmdTypeLabel, 0, 0);
+    cmdLayout->addWidget(cmdTypeComboBox, 0, 1, 1, 2);
+    cmdLayout->addWidget(cmdNameLabel, 1, 0);
+    cmdLayout->addWidget(cmdNameEdit, 1, 1, 1, 2);
+    cmdLayout->addWidget(cmdScriptLabel, 2, 0);
+    cmdLayout->addWidget(cmdScriptEdit, 2, 1, 1, 4);
+    cmdLayout->setColumnStretch(3, 1);
+    cmdLayout->setRowStretch(4, 1);
+    cmdGroupBox->setLayout(cmdLayout);
 }
 
 void Window::createActions()
