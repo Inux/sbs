@@ -1,5 +1,7 @@
 #include "window.h"
 
+#include "cmd_dialog.h"
+
 #ifndef QT_NO_SYSTEMTRAYICON
 
 #include <QAction>
@@ -22,30 +24,26 @@
 Window::Window()
 {
     createCommands();
-    createIconGroupBox();
-    createMessageGroupBox();
+    createCmdSelectGroupBox();
     createCmdGroupBox();
-
-    iconLabel->setMinimumWidth(durationLabel->sizeHint().width());
 
     createActions();
     createTrayIcon();
 
     connect(executeCommandButton, &QAbstractButton::clicked, this, &Window::executeCommand);
-    connect(showMessageButton, &QAbstractButton::clicked, this, &Window::showMessage);
-    connect(showIconCheckBox, &QAbstractButton::toggled, trayIcon, &QSystemTrayIcon::setVisible);
-    connect(iconComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &Window::setIcon);
+    connect(cmdNewButton, &QAbstractButton::clicked, this, &Window::showCmdDialog);
+    connect(cmdDeleteButton, &QAbstractButton::clicked, this, &Window::showMessage);
+    connect(cmdSelectComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &Window::setCmdOfEditor);
     connect(trayIcon, &QSystemTrayIcon::messageClicked, this, &Window::messageClicked);
     connect(trayIcon, &QSystemTrayIcon::activated, this, &Window::iconActivated);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(iconGroupBox);
-    mainLayout->addWidget(messageGroupBox);
+    mainLayout->addWidget(cmdSelectGroupBox);
     mainLayout->addWidget(cmdGroupBox);
     setLayout(mainLayout);
 
-    iconComboBox->setCurrentIndex(1);
+    cmdSelectComboBox->setCurrentIndex(1);
     trayIcon->show();
 
     setWindowTitle(tr("Systray"));
@@ -78,13 +76,19 @@ void Window::closeEvent(QCloseEvent *event)
     }
 }
 
-void Window::setIcon(int index)
+void Window::setCmdOfEditor(int index)
 {
-    QIcon icon = iconComboBox->itemIcon(index);
+    qDebug() << "Index: " << index;
+    QIcon icon = cmdSelectComboBox->itemIcon(index);
     trayIcon->setIcon(icon);
     setWindowIcon(icon);
 
-    trayIcon->setToolTip(iconComboBox->itemText(index));
+    auto cmdPair = cmdManager->getCmdByIndex(index);
+    cmdTypeEdit->setText(Commands::getTypeString(cmdPair.second.cmdType));
+    cmdNameEdit->setText(cmdPair.second.name);
+    cmdScriptEdit->setText(cmdPair.second.scriptPath);
+
+    trayIcon->setToolTip(cmdSelectComboBox->itemText(index));
 }
 
 void Window::iconActivated(QSystemTrayIcon::ActivationReason reason)
@@ -92,7 +96,7 @@ void Window::iconActivated(QSystemTrayIcon::ActivationReason reason)
     switch (reason) {
     case QSystemTrayIcon::Trigger:
     case QSystemTrayIcon::DoubleClick:
-        iconComboBox->setCurrentIndex((iconComboBox->currentIndex() + 1) % iconComboBox->count());
+        cmdSelectComboBox->setCurrentIndex((cmdSelectComboBox->currentIndex() + 1) % cmdSelectComboBox->count());
         break;
     case QSystemTrayIcon::MiddleClick:
         showMessage();
@@ -104,17 +108,13 @@ void Window::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void Window::showMessage()
 {
-    showIconCheckBox->setChecked(true);
-    QSystemTrayIcon::MessageIcon msgIcon = QSystemTrayIcon::MessageIcon(
-            typeComboBox->itemData(typeComboBox->currentIndex()).toInt());
-    if (msgIcon == QSystemTrayIcon::NoIcon) {
-        QIcon icon(iconComboBox->itemIcon(iconComboBox->currentIndex()));
-        trayIcon->showMessage(titleEdit->text(), bodyEdit->toPlainText(), icon,
-                          durationSpinBox->value() * 1000);
-    } else {
-        trayIcon->showMessage(titleEdit->text(), bodyEdit->toPlainText(), msgIcon,
-                          durationSpinBox->value() * 1000);
-    }
+
+}
+
+void Window::showCmdDialog()
+{
+    CmdDialog* cmdDialog = new CmdDialog();
+    cmdDialog->show();
 }
 
 void Window::messageClicked()
@@ -126,8 +126,7 @@ void Window::messageClicked()
 
 void Window::executeCommand()
 {
-    showIconCheckBox->setChecked(true);
-    QString key = iconComboBox->itemText(iconComboBox->currentIndex());
+    QString key = cmdSelectComboBox->itemText(cmdSelectComboBox->currentIndex());
     qDebug() << key;
     auto pos = cmdManager->getCmds().find(key);
     if(pos != cmdManager->getCmds().end()) {
@@ -140,7 +139,7 @@ void Window::executeCommand()
             trayIcon->showMessage(cmd.name,
                                   cmd.scriptPath + " executed Successfully!",
                                   QSystemTrayIcon::Critical,
-                                  durationSpinBox->value() * 1000);
+                                  5000);
         } else {
             QSystemTrayIcon::MessageIcon msgIcon = QSystemTrayIcon::Warning;
             trayIcon->setIcon(QIcon(":/images/heart.png"));
@@ -148,130 +147,74 @@ void Window::executeCommand()
                                   cmd.scriptPath + " execution Problem!\n" +
                                   "Output: \n" + res.errors,
                                   msgIcon,
-                                  durationSpinBox->value() * 1000);
+                                  5000);
         }
     }
 }
 
-void Window::createIconGroupBox()
+void Window::createCmdSelectGroupBox()
 {
-    iconGroupBox = new QGroupBox(tr("Commands"));
+    cmdSelectGroupBox = new QGroupBox(tr("Commands"));
 
-    iconLabel = new QLabel("Command:");
+    cmdSelectLabel = new QLabel("Command:");
 
-    iconComboBox = new QComboBox;
+    cmdSelectComboBox = new QComboBox;
     qDebug() << "Add Command to UI:";
     qDebug() << "commands size: " << cmdManager->getCmds().size();
     for(auto& c : cmdManager->getCmds()) {
         qDebug() << c.first;
         qDebug() << "Script: " << c.second.name;
-        iconComboBox->addItem(QIcon(":/images/heart.png"),
+        cmdSelectComboBox->addItem(QIcon(":/images/heart.png"),
                               c.second.name);
     }
-
-    showIconCheckBox = new QCheckBox(tr("Show icon"));
-    showIconCheckBox->setChecked(true);
 
     executeCommandButton = new QPushButton(tr("Execute Command"));
     executeCommandButton->setDefault(true);
 
-    QHBoxLayout *iconLayout = new QHBoxLayout;
-    iconLayout->addWidget(iconLabel);
-    iconLayout->addWidget(iconComboBox);
-    iconLayout->addStretch();
-    iconLayout->addWidget(showIconCheckBox);
-    iconLayout->addWidget(executeCommandButton);
-    iconGroupBox->setLayout(iconLayout);
-}
-
-void Window::createMessageGroupBox()
-{
-    messageGroupBox = new QGroupBox(tr("Balloon Message"));
-
-    typeLabel = new QLabel(tr("Type:"));
-
-    typeComboBox = new QComboBox;
-    typeComboBox->addItem(tr("None"), QSystemTrayIcon::NoIcon);
-    typeComboBox->addItem(style()->standardIcon(
-            QStyle::SP_MessageBoxInformation), tr("Information"),
-            QSystemTrayIcon::Information);
-    typeComboBox->addItem(style()->standardIcon(
-            QStyle::SP_MessageBoxWarning), tr("Warning"),
-            QSystemTrayIcon::Warning);
-    typeComboBox->addItem(style()->standardIcon(
-            QStyle::SP_MessageBoxCritical), tr("Critical"),
-            QSystemTrayIcon::Critical);
-    typeComboBox->addItem(QIcon(), tr("Custom icon"),
-            QSystemTrayIcon::NoIcon);
-    typeComboBox->setCurrentIndex(1);
-
-    durationLabel = new QLabel(tr("Duration:"));
-
-    durationSpinBox = new QSpinBox;
-    durationSpinBox->setRange(5, 60);
-    durationSpinBox->setSuffix(" s");
-    durationSpinBox->setValue(15);
-
-    durationWarningLabel = new QLabel(tr("(some systems might ignore this "
-                                         "hint)"));
-    durationWarningLabel->setIndent(10);
-
-    titleLabel = new QLabel(tr("Title:"));
-
-    titleEdit = new QLineEdit(tr("Cannot connect to network"));
-
-    bodyLabel = new QLabel(tr("Body:"));
-
-    bodyEdit = new QTextEdit;
-    bodyEdit->setPlainText(tr("Don't believe me. Honestly, I don't have a "
-                              "clue.\nClick this balloon for details."));
-
-    showMessageButton = new QPushButton(tr("Show Message"));
-    showMessageButton->setDefault(true);
-
-    QGridLayout *messageLayout = new QGridLayout;
-    messageLayout->addWidget(typeLabel, 0, 0);
-    messageLayout->addWidget(typeComboBox, 0, 1, 1, 2);
-    messageLayout->addWidget(durationLabel, 1, 0);
-    messageLayout->addWidget(durationSpinBox, 1, 1);
-    messageLayout->addWidget(durationWarningLabel, 1, 2, 1, 3);
-    messageLayout->addWidget(titleLabel, 2, 0);
-    messageLayout->addWidget(titleEdit, 2, 1, 1, 4);
-    messageLayout->addWidget(bodyLabel, 3, 0);
-    messageLayout->addWidget(bodyEdit, 3, 1, 2, 4);
-    messageLayout->addWidget(showMessageButton, 5, 4);
-    messageLayout->setColumnStretch(3, 1);
-    messageLayout->setRowStretch(4, 1);
-    messageGroupBox->setLayout(messageLayout);
-}
-
-void Window::createCmdGroupBox() {
-    cmdGroupBox = new QGroupBox(tr("Commands"));
+    //Details of Command
 
     cmdTypeLabel = new QLabel(tr("Type:"));
-    cmdTypeComboBox = new QComboBox;
-    cmdTypeComboBox->addItem("Python");
-    cmdTypeComboBox->addItem("Bash");
-    cmdTypeComboBox->setCurrentIndex(1);
+    cmdTypeEdit = new QLineEdit(tr("Command Type"));
+    cmdTypeEdit->setReadOnly(true);
 
     cmdNameLabel = new QLabel(tr("Name:"));
     cmdNameEdit = new QLineEdit(tr("Command"));
+    cmdNameEdit->setReadOnly(true);
 
     cmdScriptLabel = new QLabel(tr("Script Path:"));
     cmdScriptEdit = new QLineEdit(tr("/path/to/script.sh"));
+    cmdScriptEdit->setReadOnly(true);
 
-    cmdSaveButton = new QPushButton(tr("Save"));
-    showMessageButton->setDefault(true);
+    cmdDeleteButton = new QPushButton(tr("Delete"));
+    QPalette palette = cmdDeleteButton->palette();
+    palette.setColor(QPalette::ButtonText, QColor(Qt::red));
+    cmdDeleteButton->setPalette(palette);
+    cmdDeleteButton->update();
+
+    QGridLayout* cmdLayout = new QGridLayout;
+    cmdLayout->addWidget(cmdSelectLabel, 0, 0, 1, 1);
+    cmdLayout->addWidget(cmdSelectComboBox, 0, 1, 1, 3);
+    cmdLayout->addWidget(executeCommandButton, 0, 4, 1, 2);
+    cmdLayout->addWidget(cmdTypeLabel, 1, 0, 1, 1);
+    cmdLayout->addWidget(cmdTypeEdit, 1, 1, 1, 5);
+    cmdLayout->addWidget(cmdNameLabel, 2, 0, 1, 1);
+    cmdLayout->addWidget(cmdNameEdit, 2, 1, 1, 5);
+    cmdLayout->addWidget(cmdScriptLabel, 3, 0, 1, 1);
+    cmdLayout->addWidget(cmdScriptEdit, 3, 1, 1, 5);
+    cmdLayout->addWidget(cmdDeleteButton, 4, 5, 1, 1);
+    cmdSelectGroupBox->setLayout(cmdLayout);
+}
+
+void Window::createCmdGroupBox() {
+    cmdGroupBox = new QGroupBox(tr("Edit"));
+
+    cmdNewButton = new QPushButton(tr("New"));
+    cmdNewButton->setDefault(true);
 
     QGridLayout *cmdLayout = new QGridLayout;
-    cmdLayout->addWidget(cmdTypeLabel, 0, 0);
-    cmdLayout->addWidget(cmdTypeComboBox, 0, 1, 1, 2);
-    cmdLayout->addWidget(cmdNameLabel, 1, 0);
-    cmdLayout->addWidget(cmdNameEdit, 1, 1, 1, 2);
-    cmdLayout->addWidget(cmdScriptLabel, 2, 0);
-    cmdLayout->addWidget(cmdScriptEdit, 2, 1, 1, 4);
-    cmdLayout->setColumnStretch(3, 1);
-    cmdLayout->setRowStretch(4, 1);
+    cmdLayout->addWidget(cmdNewButton, 0, 0, 1, 6);
+    cmdLayout->setColumnStretch(2, 1);
+    cmdLayout->setRowStretch(1, 1);
     cmdGroupBox->setLayout(cmdLayout);
 }
 

@@ -1,8 +1,8 @@
-#ifndef CMDMANAGER_H
-#define CMDMANAGER_H
+#ifndef CMD_MANAGER_H
+#define CMD_MANAGER_H
 
 #include "cmd.h"
-#include "cmdresult.h"
+#include "cmd_result.h"
 
 #include <map>
 #include <qdebug.h>
@@ -21,7 +21,8 @@ class CmdManager
 public:
     CmdManager();
     ~CmdManager() = default;
-    std::map<QString, Cmd>& getCmds();
+    std::map<QString, Cmd> getCmds();
+    std::pair<const QString, Cmd> getCmdByIndex(const int index);
     void add(Cmd cmd);
     void remove(Cmd cmd);
     CmdResult execute(QString cmdKey);
@@ -35,4 +36,4 @@ private:
 
 } // namespace Commands
 
-#endif // CMDMANAGER_H
+#endif // CMD_MANAGER_H
