@@ -6,7 +6,8 @@
                 "${workspaceFolder}/src/**",
                 "/usr/local/Cellar/qt/5.9.3/lib/QtCore.framework/Versions/5/Headers",
                 "/usr/local/Cellar/qt/5.9.3/lib/QtWidgets.framework/Versions/5/Headers",
-                "/usr/local/Cellar/qt/5.9.3/lib/QtGui.framework/Versions/5/Headers"
+                "/usr/local/Cellar/qt/5.9.3/lib/QtGui.framework/Versions/5/Headers",
+                "${workspaceFolder}/src/commands"
             ],
             "defines": [],
             "macFrameworkPath": [

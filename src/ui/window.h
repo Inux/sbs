@@ -9,8 +9,8 @@
 #include <QDebug>
 #include <qlogging.h>
 
-#include "cmdresult.h"
-#include "cmdmanager.h"
+#include "cmd_result.h"
+#include "cmd_manager.h"
 
 class QAction;
 class QCheckBox;
@@ -36,46 +36,35 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
-    void setIcon(int index);
+    void setCmdOfEditor(int index);
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void showMessage();
+    void showCmdDialog();
     void executeCommand();
     void messageClicked();
 
 private:
     void createCommands();
-    void createIconGroupBox();
-    void createMessageGroupBox();
+    void createCmdSelectGroupBox();
     void createCmdGroupBox();
     void createActions();
     void createTrayIcon();
 
-    QGroupBox *iconGroupBox;
-    QLabel *iconLabel;
-    QComboBox *iconComboBox;
-    QCheckBox *showIconCheckBox;
+    QGroupBox *cmdSelectGroupBox;
+    QLabel *cmdSelectLabel;
+    QComboBox *cmdSelectComboBox;
     QPushButton *executeCommandButton;
-
-    QGroupBox *messageGroupBox;
-    QLabel *typeLabel;
-    QLabel *durationLabel;
-    QLabel *durationWarningLabel;
-    QLabel *titleLabel;
-    QLabel *bodyLabel;
-    QComboBox *typeComboBox;
-    QSpinBox *durationSpinBox;
-    QLineEdit *titleEdit;
-    QTextEdit *bodyEdit;
-    QPushButton *showMessageButton;
 
     QGroupBox* cmdGroupBox;
     QLabel* cmdTypeLabel;
-    QComboBox *cmdTypeComboBox;
+    QLineEdit *cmdTypeEdit;
     QLabel* cmdNameLabel;
     QLineEdit* cmdNameEdit;
     QLabel* cmdScriptLabel;
     QLineEdit* cmdScriptEdit;
-    QPushButton* cmdSaveButton;
+    QLabel* cmdNewLabel;
+    QPushButton* cmdNewButton;
+    QPushButton* cmdDeleteButton;
 
     QAction *minimizeAction;
     QAction *maximizeAction;

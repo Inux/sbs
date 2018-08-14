@@ -1,4 +1,4 @@
-#include "cmdmanager.h"
+#include "cmd_manager.h"
 
 const QString CONFIG_UPDATE_DATE = "updateDate";
 const QString CONFIG_COMMAND_NAMES = "commandNames";
@@ -8,7 +8,7 @@ namespace
 bool fileExists(QString path)
 {
     QFileInfo check_file(path);
-    // check if file exists and if yes: Is it really a file and no directory?
+    // check if file exists and if it is directory
     if (check_file.exists() && check_file.isFile())
     {
         return true;
@@ -58,9 +58,23 @@ CmdManager::CmdManager() : commands()
 {
 }
 
-std::map<QString, Cmd> &CmdManager::getCmds()
+std::map<QString, Cmd> CmdManager::getCmds()
 {
     return commands;
+}
+
+std::pair<const QString, Cmd> CmdManager::getCmdByIndex(const int index)
+{
+    int count = 0;
+    for(auto& c : this->getCmds()) {
+        if(count == index)
+        {
+            return c;
+        }
+        count++;
+    }
+    auto retval = std::pair<const QString, Cmd>();
+    return retval;
 }
 
 void CmdManager::add(Cmd cmd)
@@ -96,6 +110,9 @@ CmdResult CmdManager::execute(QString cmdKey)
             break;
         case Commands::PYTHON:
             retval = ::execute(getPython(), args);
+            break;
+        case Commands::UNKNOWN:
+            retval = {false, QString("no output"), QString("Command type is UNKNOWN")};
             break;
         }
         tempFile->remove();

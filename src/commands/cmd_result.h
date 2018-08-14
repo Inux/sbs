@@ -1,5 +1,5 @@
-#ifndef CMDRESULT_H
-#define CMDRESULT_H
+#ifndef CMD_RESULT_H
+#define CMD_RESULT_H
 
 #include <qstring.h>
 
@@ -14,4 +14,4 @@ struct CmdResult {
 
 } // namespace Commands
 
-#endif // CMDRESULT_H
+#endif // CMD_RESULT_H

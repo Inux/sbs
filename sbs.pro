@@ -7,14 +7,17 @@ INCLUDEPATH += $$PWD/src/commands \
 
 SOURCES += src/main.cpp \
     src/ui/window.cpp \
-    src/commands/cmdmanager.cpp
+    src/ui/cmd_dialog.cpp \
+    src/commands/cmd_manager.cpp \
+    src/commands/cmd_type.cpp
 
 HEADERS  += \
     src/ui/window.h \
-    src/commands/cmdmanager.h \
-    src/commands/cmdtype.h \
+    src/ui/cmd_dialog.h \
+    src/commands/cmd_manager.h \
+    src/commands/cmd_type.h \
     src/commands/cmd.h \
-    src/commands/cmdresult.h
+    src/commands/cmd_result.h
 
 FORMS    +=
 
